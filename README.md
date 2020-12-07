@@ -2,7 +2,7 @@
 join-order-benchmark for mysql
 
 # Prepare data
-download data files from http://homepages.cwi.nl/~boncz/job/imdb.tgz; then extract
+download data files from http://homepages.cwi.nl/~boncz/job/imdb.tgz and extract
 ```
 mkdir job; cd job;
 mkdir imdb-2014-csv-mysql
