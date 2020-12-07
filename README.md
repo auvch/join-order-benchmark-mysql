@@ -1,7 +1,8 @@
 # join-order-benchmark-mysql
 join-order-benchmark for mysql
 
-# Download data && extract csv files
+# Prepare data
+download data files from http://homepages.cwi.nl/~boncz/job/imdb.tgz; then extract
 ```
 mkdir job; cd job;
 mkdir imdb-2014-csv-mysql
@@ -12,7 +13,7 @@ mv *.csv imdb-2014-csv-mysql
 # Load data
 add a new line `sql_mode=NO_ENGINE_SUBSTITUTION` to `my.cnf` or `my.ini`, and restart mysqld
 
-then run the followings
+then run the followings:
 ```
 mysql -uroot -S$MYSQL_SOCK -e "drop database if exists imdbload"
 mysql -uroot -S$MYSQL_SOCK -e "create database imdbload"
