@@ -1,5 +1,5 @@
 # join-order-benchmark-mysql
-join-order-benchmark for mysql
+join-order-benchmark(JOB) for mysql
 
 # Prepare data
 download data files from http://homepages.cwi.nl/~boncz/job/imdb.tgz and extract
