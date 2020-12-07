@@ -10,8 +10,9 @@ mv *.csv imdb-2014-csv-mysql
 ```
 
 # Load data
-add a new line `sql_mode=NO_ENGINE_SUBSTITUTION` to my.cnf or my.ini
-restart mysqld
+add a new line `sql_mode=NO_ENGINE_SUBSTITUTION` to `my.cnf` or `my.ini`, and restart mysqld
+
+then run the followings
 ```
 mysql -uroot -S$MYSQL_SOCK -e "drop database if exists imdbload"
 mysql -uroot -S$MYSQL_SOCK -e "create database imdbload"
@@ -34,8 +35,6 @@ mysql -uroot -S$MYSQL_SOCK imdbload < analyze-tables.sql
 # Generate workload
 Generate workload of all 113 queries:
 ```
-mkdir test-workload
-
 (
 
 cat db_init.sql
@@ -46,9 +45,6 @@ for FILE in queries-mysql/[0-9]*.sql ; do
   QUERY_NAME=${QUERY_NAME/.sql/}
 
   echo "-- ### QUERY $QUERY_NAME ##########################################"
-  
-  # echo "-- ### Warmup "
-  # cat $FILE
 
   echo "-- ### Test run "
   sed -e "s/__QUERY_NAME__/$QUERY_NAME/" < query_start.sql
@@ -57,23 +53,20 @@ for FILE in queries-mysql/[0-9]*.sql ; do
   cat query_end.sql
 done
 
-) > test-workload/run-queries.sql
+) > run-all-queries.sql
 ```
 
-Or you can create a list of queries and generate workload partly:
+Or you can specify a list of queries in `selected.txt` and generate workload partly:
 ```
 (
 
 cat db_init.sql
 
-cat selectedList.txt | while read a ; do 
+cat selected.txt | while read a ; do 
 
   QUERY_NAME=${a/.sql/}
 
   echo "-- ### QUERY $QUERY_NAME ##########################################"
-  
-  # echo "-- ### Warmup "
-  # cat $FILE
 
   echo "-- ### Test run "
   sed -e "s/__QUERY_NAME__/$QUERY_NAME/" < query_start.sql
@@ -83,16 +76,16 @@ cat selectedList.txt | while read a ; do
   cat query_end.sql
 done
 
-) > test-workload/run-selected-queries.sql
+) > run-selected-queries.sql
 ```
 
 # Run workload
 ```
-mysql -uroot -S$MYSQL_SOCK imdbload < test-workload/run-queries.sql | tee test-workload/log.txt
+mysql -uroot -S$MYSQL_SOCK imdbload < run-all-queries.sql | tee test-workload/log.txt
 ```
 it can be also executed without output:
 ```
-mysql -uroot -S$MYSQL_SOCK imdbload < test-workload/run-queries.sql > /dev/null 2>&1
+mysql -uroot -S$MYSQL_SOCK imdbload < run-all-queries.sql > /dev/null 2>&1
 ```
 To export execution time:
 ```
