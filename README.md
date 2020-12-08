@@ -2,7 +2,7 @@
 join-order-benchmark(JOB) for mysql
 
 # Prepare data
-download data files from http://homepages.cwi.nl/~boncz/job/imdb.tgz and extract
+download data files from http://homepages.cwi.nl/~boncz/job/imdb.tgz and extract csv files
 ```
 mkdir job; cd job;
 mkdir imdb-2014-csv-mysql
@@ -33,62 +33,35 @@ done > analyze-tables.sql
 mysql -uroot -S$MYSQL_SOCK imdbload < analyze-tables.sql
 ```
 
-# Generate workload
-Generate workload of all 113 queries:
-```
-(
-
-cat db_init.sql
-
-for FILE in queries-mysql/[0-9]*.sql ; do 
-
-  QUERY_NAME=`basename $FILE`
-  QUERY_NAME=${QUERY_NAME/.sql/}
-
-  echo "-- ### QUERY $QUERY_NAME ##########################################"
-
-  echo "-- ### Test run "
-  sed -e "s/__QUERY_NAME__/$QUERY_NAME/" < query_start.sql
-  cat $FILE
-
-  cat query_end.sql
-done
-
-) > run-all-queries.sql
-```
-
-Or you can specify a list of queries in `selected.txt` and generate workload partly:
-```
-(
-
-cat db_init.sql
-
-cat selected.txt | while read a ; do 
-
-  QUERY_NAME=${a/.sql/}
-
-  echo "-- ### QUERY $QUERY_NAME ##########################################"
-
-  echo "-- ### Test run "
-  sed -e "s/__QUERY_NAME__/$QUERY_NAME/" < query_start.sql
-  cat queries-mysql/$a
-  # cat $FILE
-
-  cat query_end.sql
-done
-
-) > run-selected-queries.sql
-```
-
 # Run workload
+to run all 113 queries:
 ```
-mysql -uroot -S$MYSQL_SOCK imdbload < run-all-queries.sql | tee test-workload/log.txt
+chmod u+x run_job.sh
+./run_job.sh all_queries.txt queries-mysql/ output.res
 ```
-it can be also executed without output:
+you can also specify queries and execution order in a txt file, like `selected.txt`:
 ```
-mysql -uroot -S$MYSQL_SOCK imdbload < run-all-queries.sql > /dev/null 2>&1
+./run_job.sh selected.txt queries-mysql/ output.res
 ```
-To export execution time:
+# Output
+output is like the followings:
 ```
-select query_name, query_time_ms from my_job_result into outfile 'output.csv';
+query   lat(ms)
+3a      241.113000000000000000000000000
+13d     12175.714000000000000000000000000
+17a     8141.935000000000000000000000000
+11d     498.170000000000000000000000000
+25c     38135.314000000000000000000000000
+2d      578.571000000000000000000000000
+31a     574.830000000000000000000000000
+4a      3771.808000000000000000000000000
+23b     537.806000000000000000000000000
+12b     4400.070000000000000000000000000
+20b     2335.184000000000000000000000000
+3b      130.435000000000000000000000000
+33b     9.086000000000000000000000000
+28a     3147.823000000000000000000000000
+
+avg_throughput(txn/min):        560.0476
+avg_latency(ms):        5334.1327
 ```
